@@ -5,7 +5,6 @@ import ProductGallery from "@/components/ProductGallery";
 import SuperstructuresSection from "@/components/SuperstructuresSection";
 import About from "@/components/About";
 import Testimonials from "@/components/Testimonials";
-import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
 import ScrollRevealSection from "@/components/ScrollRevealSection";
 
@@ -30,9 +29,6 @@ export default function Home() {
       </ScrollRevealSection>
       <ScrollRevealSection delay={0.14}>
         <Testimonials />
-      </ScrollRevealSection>
-      <ScrollRevealSection delay={0.16}>
-        <CTA />
       </ScrollRevealSection>
       <Footer />
     </main>

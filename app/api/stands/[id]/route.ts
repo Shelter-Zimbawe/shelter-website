@@ -18,9 +18,43 @@ function calculatePlotFinancials(price: number) {
   };
 }
 
+const canonicalImageFilenames: Record<string, string> = {
+  "rockview.webp": "Rockview.webp",
+  "adeladepark.webp": "AdeladePark.webp",
+  "lendypark.webp": "LendyPark.webp",
+  "chipukutu1.webp": "Chipukutu1.webp",
+  "chipukutu2.jpg": "Chipukutu2.jpg",
+  "chipukutumain.webp": "Chipukutumain.webp",
+  "rosegardens.webp": "Rosegardens.webp",
+  "rosegardens1.webp": "Rosegardens1.webp",
+  "rosegardens2.webp": "Rosegardens2.webp",
+  "rosegardens3.webp": "Rosegardens3.webp",
+};
+
+function normalizePublicImagePath(image: string) {
+  const raw = String(image || "").trim();
+  if (!raw.startsWith("/images/")) {
+    return raw;
+  }
+
+  const [pathOnly, query = ""] = raw.split("?");
+  const fileName = pathOnly.split("/").pop()?.toLowerCase();
+  if (!fileName) {
+    return raw;
+  }
+
+  const canonical = canonicalImageFilenames[fileName];
+  if (!canonical) {
+    return raw;
+  }
+
+  return `/images/${canonical}${query ? `?${query}` : ""}`;
+}
+
 function serializeStand(stand: any, plots: any[]) {
   return {
     ...stand,
+    image: normalizePublicImagePath(stand.image),
     features: JSON.parse(stand.features || '[]'),
     available: Boolean(stand.available),
     direction: stand.direction || '',
@@ -84,7 +118,7 @@ export async function PUT(
       body.name ?? currentStand.name,
       body.category ?? currentStand.category,
       body.price ?? currentStand.price,
-      body.image ?? currentStand.image,
+      normalizePublicImagePath(body.image ?? currentStand.image),
       body.description ?? currentStand.description,
       JSON.stringify(body.features || JSON.parse(currentStand.features || '[]')),
       body.available !== undefined ? (body.available ? 1 : 0) : currentStand.available,

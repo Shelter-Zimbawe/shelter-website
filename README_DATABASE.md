@@ -1,6 +1,6 @@
 # Local SQL Database Setup
 
-This project uses **SQLite** - a local SQL database that stores data in a file on your computer. No external services needed!
+This project uses **SQLite** - a local SQL database that stores data in a file on your computer (or on a mounted persistent volume in production). No external services needed!
 
 ## Quick Start
 
@@ -15,6 +15,22 @@ npm run dev
 ```
 
 That's it! The database will be automatically created in `data/shelter.db` when you first run the app.
+
+## Production (Railway / Hosting)
+
+If you deploy to Railway (or any platform with ephemeral filesystem), your SQLite file is lost unless it lives on a persistent volume.
+
+Set:
+
+- `DB_PATH` to a persistent mount path (for example `/data/shelter.db` on Railway volume mounts)
+- `SEED_DATABASE=false` in production to prevent fallback/default records from being inserted
+
+Keep using:
+
+- `ADMIN_PASSWORD`
+- `ADMIN_SECRET`
+
+If `DB_PATH` is not set, the app defaults to `data/shelter.db` in the app filesystem.
 
 ## Database Location
 

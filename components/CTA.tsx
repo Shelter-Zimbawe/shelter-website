@@ -85,7 +85,7 @@ export default function CTA() {
               </div>
               <div className="text-left">
                 <div className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Call Us</div>
-                <div className="font-bold">+1 (555) 123-4567</div>
+                <div className="font-bold">+263 242 774 455 / 748 121</div>
               </div>
             </div>
             <div className="flex w-full max-w-sm items-center gap-3 sm:w-auto">
@@ -94,7 +94,7 @@ export default function CTA() {
               </div>
               <div className="text-left">
                 <div className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Email Us</div>
-                <div className="font-bold">hello@shelterzimbabwe.com</div>
+                <div className="font-bold">sales@shelter.co.zw</div>
               </div>
             </div>
           </motion.div>

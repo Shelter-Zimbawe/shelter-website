@@ -24,9 +24,43 @@ function calculatePlotFinancials(price: number) {
   };
 }
 
+const canonicalImageFilenames: Record<string, string> = {
+  "rockview.webp": "Rockview.webp",
+  "adeladepark.webp": "AdeladePark.webp",
+  "lendypark.webp": "LendyPark.webp",
+  "chipukutu1.webp": "Chipukutu1.webp",
+  "chipukutu2.jpg": "Chipukutu2.jpg",
+  "chipukutumain.webp": "Chipukutumain.webp",
+  "rosegardens.webp": "Rosegardens.webp",
+  "rosegardens1.webp": "Rosegardens1.webp",
+  "rosegardens2.webp": "Rosegardens2.webp",
+  "rosegardens3.webp": "Rosegardens3.webp",
+};
+
+function normalizePublicImagePath(image: string) {
+  const raw = String(image || "").trim();
+  if (!raw.startsWith("/images/")) {
+    return raw;
+  }
+
+  const [pathOnly, query = ""] = raw.split("?");
+  const fileName = pathOnly.split("/").pop()?.toLowerCase();
+  if (!fileName) {
+    return raw;
+  }
+
+  const canonical = canonicalImageFilenames[fileName];
+  if (!canonical) {
+    return raw;
+  }
+
+  return `/images/${canonical}${query ? `?${query}` : ""}`;
+}
+
 function serializeStand(stand: any, plots: any[]) {
   return {
     ...stand,
+    image: normalizePublicImagePath(stand.image),
     features: JSON.parse(stand.features || '[]'),
     available: Boolean(stand.available),
     direction: stand.direction || '',
@@ -83,6 +117,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const minimumPrice = body.minimumPrice || parseCurrency(body.price || '');
+    const normalizedImage = normalizePublicImagePath(body.image);
     const plots = Array.isArray(body.plots) ? body.plots : [];
 
     const stmt = db.prepare(`
@@ -96,7 +131,7 @@ export async function POST(request: Request) {
       body.name,
       body.category,
       body.price || formatFromPrice(minimumPrice),
-      body.image,
+      normalizedImage,
       body.description,
       JSON.stringify(body.features || []),
       body.available !== undefined ? (body.available ? 1 : 0) : 1,

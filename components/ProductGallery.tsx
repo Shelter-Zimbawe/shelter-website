@@ -102,7 +102,7 @@ export default function ProductGallery() {
       `Hello Shelter Zimbabwe,%0D%0A%0D%0AI would like to start the purchase process for ${stand.name} in ${stand.location}.%0D%0A%0D%0AMy preferred option is:%0D%0A- Location: ${stand.location}%0D%0A- Direction: ${stand.direction}%0D%0A- Starting price: ${formatCurrency(stand.minimumPrice)}`
     );
 
-    window.location.href = `mailto:hello@shelterzimbabwe.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:sales@shelter.co.zw?subject=${subject}&body=${body}`;
   };
 
   return (

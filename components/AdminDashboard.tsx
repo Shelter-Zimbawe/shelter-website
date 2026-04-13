@@ -212,6 +212,7 @@ export default function AdminDashboard() {
   const [superstructures, setSuperstructures] = useState<Superstructure[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [editing, setEditing] = useState<Superstructure | null>(null);
@@ -219,19 +220,37 @@ export default function AdminDashboard() {
   const [editingStand, setEditingStand] = useState<Stand | null>(null);
   const [standForm, setStandForm] = useState<StandFormState | null>(null);
 
+  const fetchJson = async <T,>(url: string, init?: RequestInit): Promise<T> => {
+    const res = await fetch(url, init);
+    if (!res.ok) {
+      let message = `Request failed (${res.status})`;
+      try {
+        const body = await res.json();
+        if (body?.error) {
+          message = body.error;
+        }
+      } catch {
+        // Keep fallback message if response body isn't JSON.
+      }
+      throw new Error(message);
+    }
+    return res.json();
+  };
+
   const refresh = async () => {
     setLoading(true);
+    setError(null);
     try {
       if (tab === "stands") {
-        const res = await fetch("/api/stands");
-        setStands(await res.json());
+        setStands(await fetchJson<Stand[]>("/api/stands"));
       } else if (tab === "superstructures") {
-        const res = await fetch("/api/superstructures");
-        setSuperstructures(await res.json());
+        setSuperstructures(await fetchJson<Superstructure[]>("/api/superstructures"));
       } else {
-        const res = await fetch("/api/bookings");
-        setBookings(await res.json());
+        setBookings(await fetchJson<Booking[]>("/api/bookings"));
       }
+    } catch (err) {
+      console.error("Dashboard refresh failed:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch dashboard data");
     } finally {
       setLoading(false);
     }
@@ -381,6 +400,12 @@ export default function AdminDashboard() {
           <button onClick={() => setTab("superstructures")} className={`border-b-2 px-6 py-3 font-semibold ${tab === "superstructures" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><Layers3 className="mr-2 inline-block h-5 w-5" />Superstructures</button>
           <button onClick={() => setTab("bookings")} className={`border-b-2 px-6 py-3 font-semibold ${tab === "bookings" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><Users className="mr-2 inline-block h-5 w-5" />Bookings</button>
         </div>
+
+        {error && (
+          <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         {loading ? (
           <div className="py-16 text-center text-gray-600">Loading...</div>

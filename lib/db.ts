@@ -2,8 +2,16 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 
-const dbPath = path.join(process.cwd(), 'data', 'shelter.db');
+const configuredDbPath = process.env.DB_PATH?.trim();
+const dbPath = configuredDbPath
+  ? path.isAbsolute(configuredDbPath)
+    ? configuredDbPath
+    : path.join(process.cwd(), configuredDbPath)
+  : path.join(process.cwd(), 'data', 'shelter.db');
 const dbDir = path.dirname(dbPath);
+const shouldSeedDatabase =
+  process.env.SEED_DATABASE === "true" ||
+  (process.env.SEED_DATABASE !== "false" && process.env.NODE_ENV !== "production");
 
 // Ensure data directory exists
 if (!fs.existsSync(dbDir)) {
@@ -380,207 +388,209 @@ export function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_bookings_created_at ON bookings(created_at DESC);
   `);
 
-  // Insert sample data if tables are empty
-  const standCount = db.prepare('SELECT COUNT(*) as count FROM stands').get() as { count: number };
-  if (standCount.count === 0) {
-    const insertStand = db.prepare(`
-      INSERT INTO stands (
-        name, category, price, image, description, features, available, location, size, direction, completion_status, minimum_price
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+  if (shouldSeedDatabase) {
+    // Insert sample data if tables are empty
+    const standCount = db.prepare('SELECT COUNT(*) as count FROM stands').get() as { count: number };
+    if (standCount.count === 0) {
+      const insertStand = db.prepare(`
+        INSERT INTO stands (
+          name, category, price, image, description, features, available, location, size, direction, completion_status, minimum_price
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
 
-    const stands = [
-      {
-        name: "Rockview Gardens",
-        category: "Residential",
-        image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop",
-        description: "Well-positioned residential stands with flexible terms for families and investors.",
-        features: ["Flexible payment terms", "Road access", "Growing residential community"],
-        available: 1,
-        location: "Rockview",
-        size: "200 - 500 sqm",
-      },
-      {
-        name: "Adelaide Park Estate",
-        category: "Premium",
-        image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800&h=600&fit=crop",
-        description: "Premium development with larger stand options in a fast-growing eastern corridor.",
-        features: ["Large plots available", "Prime growth corridor", "Ideal for long-term value"],
-        available: 1,
-        location: "Adelaide Park",
-        size: "300 - 800 sqm",
-      },
-      {
-        name: "Cornerstone Residences",
-        category: "Entry",
-        image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop",
-        description: "Affordable residential options with manageable plot sizes and strong access routes.",
-        features: ["Affordable entry pricing", "Accessible location", "Ideal starter development"],
-        available: 1,
-        location: "Residential Development",
-        size: "150 - 300 sqm",
-      },
-      {
-        name: "Elite Estates",
-        category: "Luxury",
-        image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=600&fit=crop",
-        description: "High-end stands in a premium neighbourhood for larger family homes and luxury builds.",
-        features: ["Premium address", "Larger plot options", "Upmarket lifestyle positioning"],
-        available: 1,
-        location: "Elite Estates",
-        size: "500 - 1200 sqm",
-      },
-      {
-        name: "Shelter FlexiPlots",
-        category: "Flexible",
-        image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&h=600&fit=crop",
-        description: "Smaller flexible-payment stands available across selected developments around Harare.",
-        features: ["Low entry point", "Multiple developments", "Flexible payment plans"],
-        available: 1,
-        location: "Multiple Locations",
-        size: "100 - 200 sqm",
-      },
-      {
-        name: "Custom Growth Corridor",
-        category: "Custom",
-        image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=600&fit=crop",
-        description: "Tailored stand sourcing for buyers who want options in specific growth corridors.",
-        features: ["Tailored sourcing", "Multiple location options", "Custom budget matching"],
-        available: 1,
-        location: "Custom",
-        size: "200 - 500 sqm",
-      },
-    ];
+      const stands = [
+        {
+          name: "Rockview Gardens",
+          category: "Residential",
+          image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop",
+          description: "Well-positioned residential stands with flexible terms for families and investors.",
+          features: ["Flexible payment terms", "Road access", "Growing residential community"],
+          available: 1,
+          location: "Rockview",
+          size: "200 - 500 sqm",
+        },
+        {
+          name: "Adelaide Park Estate",
+          category: "Premium",
+          image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800&h=600&fit=crop",
+          description: "Premium development with larger stand options in a fast-growing eastern corridor.",
+          features: ["Large plots available", "Prime growth corridor", "Ideal for long-term value"],
+          available: 1,
+          location: "Adelaide Park",
+          size: "300 - 800 sqm",
+        },
+        {
+          name: "Cornerstone Residences",
+          category: "Entry",
+          image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop",
+          description: "Affordable residential options with manageable plot sizes and strong access routes.",
+          features: ["Affordable entry pricing", "Accessible location", "Ideal starter development"],
+          available: 1,
+          location: "Residential Development",
+          size: "150 - 300 sqm",
+        },
+        {
+          name: "Elite Estates",
+          category: "Luxury",
+          image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=600&fit=crop",
+          description: "High-end stands in a premium neighbourhood for larger family homes and luxury builds.",
+          features: ["Premium address", "Larger plot options", "Upmarket lifestyle positioning"],
+          available: 1,
+          location: "Elite Estates",
+          size: "500 - 1200 sqm",
+        },
+        {
+          name: "Shelter FlexiPlots",
+          category: "Flexible",
+          image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&h=600&fit=crop",
+          description: "Smaller flexible-payment stands available across selected developments around Harare.",
+          features: ["Low entry point", "Multiple developments", "Flexible payment plans"],
+          available: 1,
+          location: "Multiple Locations",
+          size: "100 - 200 sqm",
+        },
+        {
+          name: "Custom Growth Corridor",
+          category: "Custom",
+          image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=600&fit=crop",
+          description: "Tailored stand sourcing for buyers who want options in specific growth corridors.",
+          features: ["Tailored sourcing", "Multiple location options", "Custom budget matching"],
+          available: 1,
+          location: "Custom",
+          size: "200 - 500 sqm",
+        },
+      ];
 
-    for (const stand of stands) {
-      const metadata = getStandMetadata(stand.location, "");
-      insertStand.run(
-        stand.name,
-        stand.category,
-        formatFromPrice(metadata.minimumPrice),
-        stand.image,
-        stand.description,
-        JSON.stringify(stand.features),
-        stand.available,
-        stand.location,
-        stand.size,
-        metadata.direction,
-        metadata.completionStatus,
-        metadata.minimumPrice
-      );
+      for (const stand of stands) {
+        const metadata = getStandMetadata(stand.location, "");
+        insertStand.run(
+          stand.name,
+          stand.category,
+          formatFromPrice(metadata.minimumPrice),
+          stand.image,
+          stand.description,
+          JSON.stringify(stand.features),
+          stand.available,
+          stand.location,
+          stand.size,
+          metadata.direction,
+          metadata.completionStatus,
+          metadata.minimumPrice
+        );
+      }
     }
-  }
 
-  const superstructureCount = db
-    .prepare("SELECT COUNT(*) as count FROM superstructure_projects")
-    .get() as { count: number };
-  if (superstructureCount.count === 0) {
-    const insertSuperstructure = db.prepare(`
-      INSERT INTO superstructure_projects (
-        group_code, project, size, price_usd, deposit_20, installment_24, installment_36, image, description
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    const insertSuperstructureMedia = db.prepare(`
+    const superstructureCount = db
+      .prepare("SELECT COUNT(*) as count FROM superstructure_projects")
+      .get() as { count: number };
+    if (superstructureCount.count === 0) {
+      const insertSuperstructure = db.prepare(`
+        INSERT INTO superstructure_projects (
+          group_code, project, size, price_usd, deposit_20, installment_24, installment_36, image, description
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      const insertSuperstructureMedia = db.prepare(`
+        INSERT INTO superstructure_media (group_code, image, media_type, source_url, embed_url, provider, is_main, sort_order)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const seededSuperstructures = [
+        {
+          groupCode: "ss-contemporary-villa",
+          project: "Contemporary Executive Villa",
+          size: "4 Bed",
+          priceUsd: 168000,
+          installment24: 8400,
+          installment36: 5600,
+          image:
+            "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=80",
+          description: "Modern double-storey design with premium finishes.",
+        },
+        {
+          groupCode: "ss-contemporary-villa",
+          project: "Contemporary Executive Villa",
+          size: "3 Bed",
+          priceUsd: 142000,
+          installment24: 7100,
+          installment36: 4733.33,
+          image:
+            "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=80",
+          description: "Modern double-storey design with premium finishes.",
+        },
+        {
+          groupCode: "ss-modern-duplex",
+          project: "Modern Duplex Residence",
+          size: "3 Bed",
+          priceUsd: 132000,
+          installment24: 6600,
+          installment36: 4400,
+          image:
+            "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+          description:
+            "A refined duplex concept with strong form, modern balance, and practical living spaces.",
+        },
+        {
+          groupCode: "ss-elegant-family-home",
+          project: "Elegant Family Home",
+          size: "3 Bed",
+          priceUsd: 118000,
+          installment24: 5900,
+          installment36: 3933.33,
+          image:
+            "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80",
+          description:
+            "A welcoming family home with elegant proportions, clean lines, and timeless appeal.",
+        },
+        {
+          groupCode: "ss-premium-cluster-homes",
+          project: "Premium Cluster Homes",
+          size: "2 Bed",
+          priceUsd: 96000,
+          installment24: 4800,
+          installment36: 3200,
+          image:
+            "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+          description:
+            "Premium cluster concepts designed for privacy, order, and a strong contemporary look.",
+        },
+      ];
+
+      for (const item of seededSuperstructures) {
+        const financials = calculateSuperstructureFinancials(item.priceUsd);
+        insertSuperstructure.run(
+          item.groupCode,
+          item.project,
+          item.size,
+          item.priceUsd,
+          financials.deposit20,
+          item.installment24,
+          item.installment36,
+          item.image,
+          item.description
+        );
+        insertSuperstructureMedia.run(item.groupCode, item.image, "image", item.image, "", "", 1, 0);
+      }
+    }
+
+    const backfillMediaFromMain = db.prepare(`
       INSERT INTO superstructure_media (group_code, image, media_type, source_url, embed_url, provider, is_main, sort_order)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      SELECT p.group_code, p.image, 'image', p.image, '', '', 1, 0
+      FROM superstructure_projects p
+      WHERE p.group_code IS NOT NULL
+        AND TRIM(p.group_code) <> ''
+        AND p.image IS NOT NULL
+        AND TRIM(p.image) <> ''
+        AND NOT EXISTS (
+          SELECT 1 FROM superstructure_media m
+          WHERE m.group_code = p.group_code
+        )
     `);
+    backfillMediaFromMain.run();
 
-    const seededSuperstructures = [
-      {
-        groupCode: "ss-contemporary-villa",
-        project: "Contemporary Executive Villa",
-        size: "4 Bed",
-        priceUsd: 168000,
-        installment24: 8400,
-        installment36: 5600,
-        image:
-          "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=80",
-        description: "Modern double-storey design with premium finishes.",
-      },
-      {
-        groupCode: "ss-contemporary-villa",
-        project: "Contemporary Executive Villa",
-        size: "3 Bed",
-        priceUsd: 142000,
-        installment24: 7100,
-        installment36: 4733.33,
-        image:
-          "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=80",
-        description: "Modern double-storey design with premium finishes.",
-      },
-      {
-        groupCode: "ss-modern-duplex",
-        project: "Modern Duplex Residence",
-        size: "3 Bed",
-        priceUsd: 132000,
-        installment24: 6600,
-        installment36: 4400,
-        image:
-          "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
-        description:
-          "A refined duplex concept with strong form, modern balance, and practical living spaces.",
-      },
-      {
-        groupCode: "ss-elegant-family-home",
-        project: "Elegant Family Home",
-        size: "3 Bed",
-        priceUsd: 118000,
-        installment24: 5900,
-        installment36: 3933.33,
-        image:
-          "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80",
-        description:
-          "A welcoming family home with elegant proportions, clean lines, and timeless appeal.",
-      },
-      {
-        groupCode: "ss-premium-cluster-homes",
-        project: "Premium Cluster Homes",
-        size: "2 Bed",
-        priceUsd: 96000,
-        installment24: 4800,
-        installment36: 3200,
-        image:
-          "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
-        description:
-          "Premium cluster concepts designed for privacy, order, and a strong contemporary look.",
-      },
-    ];
-
-    for (const item of seededSuperstructures) {
-      const financials = calculateSuperstructureFinancials(item.priceUsd);
-      insertSuperstructure.run(
-        item.groupCode,
-        item.project,
-        item.size,
-        item.priceUsd,
-        financials.deposit20,
-        item.installment24,
-        item.installment36,
-        item.image,
-        item.description
-      );
-      insertSuperstructureMedia.run(item.groupCode, item.image, "image", item.image, "", "", 1, 0);
-    }
+    syncStandMetadataAndPlots();
   }
-
-  const backfillMediaFromMain = db.prepare(`
-    INSERT INTO superstructure_media (group_code, image, media_type, source_url, embed_url, provider, is_main, sort_order)
-    SELECT p.group_code, p.image, 'image', p.image, '', '', 1, 0
-    FROM superstructure_projects p
-    WHERE p.group_code IS NOT NULL
-      AND TRIM(p.group_code) <> ''
-      AND p.image IS NOT NULL
-      AND TRIM(p.image) <> ''
-      AND NOT EXISTS (
-        SELECT 1 FROM superstructure_media m
-        WHERE m.group_code = p.group_code
-      )
-  `);
-  backfillMediaFromMain.run();
-
-  syncStandMetadataAndPlots();
 }
 
 // Initialize on import

@@ -5,28 +5,16 @@ import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "luc
 
 const footerLinks = {
   products: [
-    "Island Stands",
-    "Modular Systems",
-    "Corner Stands",
-    "Portable Stands",
+    "RockView Park Stands",
+    "Adelaide Park Stands",
+    "Mabvuku Chizhanje",
+    "Lendy Park Marondera Stands",
   ],
   services: [
-    "Design & Planning",
-    "Installation",
-    "Maintenance",
-    "Storage",
   ],
   company: [
-    "About Us",
-    "Our Portfolio",
-    "Careers",
-    "News & Press",
   ],
   support: [
-    "Help Center",
-    "Contact Us",
-    "FAQ",
-    "Warranty",
   ],
 };
 
@@ -58,27 +46,24 @@ export default function Footer() {
               <h3 className="mb-4 text-2xl font-bold sm:text-3xl" style={{ color: '#2652a2' }}>
                 Shelter Zimbabwe
               </h3>
-              <p className="mb-6 max-w-md leading-relaxed text-gray-400">
-                Premium housing exhibition stands designed for real estate events. Custom-designed to showcase your properties and connect with potential buyers.
-              </p>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(38, 82, 162, 0.2)' }}>
                     <Mail className="w-5 h-5" style={{ color: '#2652a2' }} />
                   </div>
-                  <span className="break-all text-gray-300 sm:break-normal">hello@shelterzimbabwe.com</span>
+                  <span className="break-all text-gray-300 sm:break-normal">sales@shelter.co.zw</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(38, 82, 162, 0.2)' }}>
                     <Phone className="w-5 h-5" style={{ color: '#2652a2' }} />
                   </div>
-                  <span className="text-gray-300">+1 (555) 123-4567</span>
+                  <span className="text-gray-300">+263 242 774 455 / 748 121</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(38, 82, 162, 0.2)' }}>
                     <MapPin className="w-5 h-5" style={{ color: '#2652a2' }} />
                   </div>
-                  <span className="text-gray-300">123 Exhibition Blvd, Design District, NY 10001</span>
+                  <span className="text-gray-300">Shelter House 95 Five Avenue, Harare</span>
                 </div>
               </div>
             </motion.div>

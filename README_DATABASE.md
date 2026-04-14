@@ -30,7 +30,8 @@ Keep using:
 - `ADMIN_PASSWORD`
 - `ADMIN_SECRET`
 
-If `DB_PATH` is not set, the app defaults to `data/shelter.db` in the app filesystem.
+In production, `DB_PATH` is required to avoid silent data loss on redeploy.
+If you intentionally want ephemeral data, set `ALLOW_EPHEMERAL_DB=true`.
 
 ## Database Location
 

@@ -284,6 +284,24 @@ export default function AdminDashboard() {
     });
   };
 
+  const openCreateStand = () => {
+    setEditingStand(null);
+    setStandForm({
+      name: "",
+      category: "Residential",
+      price: "",
+      image: "",
+      description: "",
+      featuresText: "",
+      location: "",
+      direction: "",
+      completionStatus: "Ready",
+      size: "",
+      plotOptionsText: "",
+      available: true,
+    });
+  };
+
   const closeEditStand = () => {
     setEditingStand(null);
     setStandForm(null);
@@ -291,13 +309,17 @@ export default function AdminDashboard() {
 
   const submitStand = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!editingStand || !standForm) return;
+    if (!standForm) return;
 
     const plots = parsePlotOptionsText(standForm.plotOptionsText);
     const minimumPrice = plots.length > 0 ? Math.min(...plots.map((plot: any) => plot.price)) : undefined;
 
-    await fetch(`/api/stands/${editingStand.id}`, {
-      method: "PUT",
+    const isEditingStand = Boolean(editingStand);
+    const url = isEditingStand ? `/api/stands/${editingStand?.id}` : "/api/stands";
+    const method = isEditingStand ? "PUT" : "POST";
+
+    await fetch(url, {
+      method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: standForm.name,
@@ -413,7 +435,16 @@ export default function AdminDashboard() {
           <div className="overflow-hidden rounded-lg bg-white shadow-lg">
             {tab === "stands" && (
               <div className="p-6">
-                <h2 className="mb-6 text-2xl font-bold text-gray-900">Stands</h2>
+                <div className="mb-6 flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-gray-900">Stands</h2>
+                  <button
+                    onClick={openCreateStand}
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#29ddda] px-4 py-2 font-semibold text-white"
+                  >
+                    <Plus className="h-4 w-4" />
+                    New Stand
+                  </button>
+                </div>
                 <table className="w-full">
                   <thead><tr className="border-b"><th className="px-4 py-3 text-left">Name</th><th className="px-4 py-3 text-left">Price</th><th className="px-4 py-3 text-left">Actions</th></tr></thead>
                   <tbody>
@@ -422,8 +453,22 @@ export default function AdminDashboard() {
                         <td className="px-4 py-3">{s.name}</td>
                         <td className="px-4 py-3">{s.minimumPrice ? `From $${s.minimumPrice.toLocaleString()}` : s.price}</td>
                         <td className="px-4 py-3">
-                          <button onClick={() => openEditStand(s)} className="mr-2 rounded p-2 hover:bg-blue-50"><Edit className="h-4 w-4 text-blue-600" /></button>
-                          <button onClick={() => deleteStand(s.id)} className="rounded p-2 hover:bg-red-50"><Trash2 className="h-4 w-4 text-red-600" /></button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => openEditStand(s)}
+                              className="inline-flex items-center gap-1 rounded border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                            >
+                              <Edit className="h-3.5 w-3.5" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => deleteStand(s.id)}
+                              className="inline-flex items-center gap-1 rounded border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -568,11 +613,11 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {editingStand && standForm && (
+      {standForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b px-6 py-4">
-              <h2 className="text-2xl font-bold">Edit Stand</h2>
+              <h2 className="text-2xl font-bold">{editingStand ? "Edit Stand" : "Create Stand"}</h2>
               <button onClick={closeEditStand} className="rounded border px-3 py-2 text-sm">Close</button>
             </div>
             <form onSubmit={submitStand} className="grid gap-4 p-6 md:grid-cols-2">
@@ -660,7 +705,7 @@ export default function AdminDashboard() {
               />
               <div className="flex justify-end gap-3">
                 <button type="button" onClick={closeEditStand} className="rounded border px-4 py-2">Cancel</button>
-                <button type="submit" className="rounded bg-[#29ddda] px-4 py-2 font-semibold text-white">Save</button>
+                <button type="submit" className="rounded bg-[#29ddda] px-4 py-2 font-semibold text-white">{editingStand ? "Save" : "Create"}</button>
               </div>
             </form>
           </div>

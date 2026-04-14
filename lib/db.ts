@@ -3,15 +3,26 @@ import path from 'path';
 import fs from 'fs';
 
 const configuredDbPath = process.env.DB_PATH?.trim();
+const defaultDbPath = path.join(process.cwd(), 'data', 'shelter.db');
 const dbPath = configuredDbPath
   ? path.isAbsolute(configuredDbPath)
     ? configuredDbPath
     : path.join(process.cwd(), configuredDbPath)
-  : path.join(process.cwd(), 'data', 'shelter.db');
+  : defaultDbPath;
 const dbDir = path.dirname(dbPath);
 const shouldSeedDatabase =
   process.env.SEED_DATABASE === "true" ||
   (process.env.SEED_DATABASE !== "false" && process.env.NODE_ENV !== "production");
+
+if (process.env.NODE_ENV === "production" && !configuredDbPath && process.env.ALLOW_EPHEMERAL_DB !== "true") {
+  throw new Error(
+    [
+      "DB_PATH is required in production to avoid data loss on redeploy.",
+      "Point DB_PATH to a persistent disk/volume path (for example: /var/data/shelter.db).",
+      "Set ALLOW_EPHEMERAL_DB=true only if you accept non-persistent data.",
+    ].join(" ")
+  );
+}
 
 // Ensure data directory exists
 if (!fs.existsSync(dbDir)) {

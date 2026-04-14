@@ -47,6 +47,28 @@ ADMIN_PASSWORD=your-strong-password
 ADMIN_SECRET=use-a-long-random-secret
 ```
 
+### Production Data Persistence (Important)
+
+This app uses SQLite (`better-sqlite3`), so the database is a file.  
+To keep your data after redeploys, you **must** set `DB_PATH` to a persistent disk/volume path in production.
+
+Required environment variables for production:
+
+- `DB_PATH` - absolute or app-relative path to a persistent `.db` file
+- `SEED_DATABASE=false` - prevents sample data seeding
+
+Example:
+
+```bash
+DB_PATH=/var/data/shelter.db
+SEED_DATABASE=false
+```
+
+Safety guard:
+
+- Production now fails fast if `DB_PATH` is not set (to prevent silent data loss)
+- If you intentionally want ephemeral data, set `ALLOW_EPHEMERAL_DB=true`
+
 ## Project Structure
 
 ```
